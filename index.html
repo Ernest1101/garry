@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZyntraRP Loading</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0a0a15;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        .bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(100, 180, 255, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 90px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 0 0 50px rgba(100,180,255,0.8);
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 30px rgba(100,180,255,0.6); }
+            50% { text-shadow: 0 0 60px rgba(100,180,255,1); }
+        }
+        
+        .logo .z { color: #64b4ff; }
+        .logo .r { color: #fff; }
+        .logo .n { color: #ffd700; }
+        
+        .status {
+            font-size: 24px;
+            margin-bottom: 50px;
+            color: #bbb;
+            min-height: 30px;
+        }
+        
+        .bar-container {
+            width: 600px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #64b4ff 0%, #4a9eff 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 30px rgba(100,180,255,0.8);
+            border-radius: 10px;
+        }
+        
+        .info {
+            font-size: 18px;
+            color: #777;
+            margin-top: 15px;
+            min-height: 25px;
+        }
+        
+        .bottom {
+            position: absolute;
+            bottom: 60px;
+            text-align: center;
+        }
+        
+        .server { 
+            font-size: 28px; 
+            font-weight: 700; 
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .ip { 
+            font-size: 20px; 
+            color: #64b4ff;
+            font-weight: 600;
+        }
+        
+        .tips {
+            position: absolute;
+            bottom: 150px;
+            text-align: center;
+            font-size: 16px;
+            color: #888;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="logo">
+            <span class="z">Zyntra</span><span class="r">RP</span> <span class="n">#1</span>
+        </div>
+        
+        <div class="status" id="status">Подключение к серверу...</div>
+        
+        <div class="bar-container">
+            <div class="bar" id="bar"></div>
+        </div>
+        
+        <div class="info" id="info">Инициализация...</div>
+        
+        <div class="tips" id="tips">
+            Нажми F1 для выбора профессии • Используй /help для помощи
+        </div>
+        
+        <div class="bottom">
+            <div class="server">Russian DarkRP Server</div>
+            <div class="ip">95.105.0.120:27015</div>
+        </div>
+    </div>
+    
+    <script>
+        // Создаем частицы
+        var particlesContainer = document.getElementById('particles');
+        for (var i = 0; i < 30; i++) {
+            var particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        var progress = 0;
+        var statusEl = document.getElementById('status');
+        var infoEl = document.getElementById('info');
+        var barEl = document.getElementById('bar');
+        
+        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+            infoEl.innerText = 'Карта: ' + mapname + ' | Игроков: ' + maxplayers;
+        }
+        
+        function SetStatusChanged(status) {
+            var texts = {
+                'Retrieving server info...': 'Получение информации о сервере...',
+                'Sending client info...': 'Отправка данных клиента...',
+                'Sending client info': 'Отправка данных клиента...',
+                'Parsing game info': 'Обработка игровой информации...',
+                'Requesting server info': 'Запрос информации сервера...',
+                'Loading resources': 'Загрузка ресурсов...',
+                'Workshop Complete': 'Workshop загружен!',
+                'Starting Lua': 'Запуск Lua скриптов...'
+            };
+            statusEl.innerText = texts[status] || status;
+        }
+        
+        function SetFilesNeeded(needed) {
+            infoEl.innerText = 'Файлов для загрузки: ' + needed;
+        }
+        
+        function SetFilesTotal(total) {
+            infoEl.innerText = 'Всего файлов: ' + total;
+        }
+        
+        function DownloadingFile(fileName) {
+            var shortName = fileName.length > 50 ? '...' + fileName.substr(-47) : fileName;
+            infoEl.innerText = 'Загрузка: ' + shortName;
+        }
+        
+        // Анимация прогресс-бара
+        setInterval(function() {
+            if (progress < 100) {
+                progress += Math.random() * 2;
+                if (progress > 100) progress = 100;
+                barEl.style.width = progress + '%';
+            }
+        }, 100);
+        
+        // Смена подсказок
+        var tips = [
+            'Нажми F1 для выбора профессии • Используй /help для помощи',
+            'Зарабатывай деньги и развивай свой бизнес!',
+            'Соблюдай правила сервера для комфортной игры',
+            'Взаимодействуй с другими игроками для лучшего опыта'
+        ];
+        var tipIndex = 0;
+        setInterval(function() {
+            tipIndex = (tipIndex + 1) % tips.length;
+            document.getElementById('tips').innerText = tips[tipIndex];
+        }, 5000);
+    </script>
+</body>
+</html>
